@@ -62,6 +62,7 @@ router.post('/login', async (req, res) => {
         type: ErrorType.FIELD_IS_EMPTY,
         message: 'Name can not be empty',
       });
+      return;
     }
 
     if (!pass) {
@@ -69,6 +70,7 @@ router.post('/login', async (req, res) => {
         type: ErrorType.FIELD_IS_EMPTY,
         message: 'Password can not be empty',
       });
+      return;
     }
 
     const user: any & IAuth = await User.findOne({ name });
@@ -77,6 +79,7 @@ router.post('/login', async (req, res) => {
         type: ErrorType.USER_NOT_EXIST,
         message: 'This user does not exist',
       });
+      return;
     }
 
     const isMatch = await bcrypt.compare(pass, user.pass);
@@ -86,6 +89,7 @@ router.post('/login', async (req, res) => {
         type: ErrorType.WRONG_PATH,
         message: 'Incorrect password',
       });
+      return;
     }
 
     const token = jwt.sign(
