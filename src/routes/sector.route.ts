@@ -10,7 +10,7 @@ router.post('/add', async (req, res) => {
   try {
     const title = (req as any).query.title;
     const record: IRecord = JSON.parse((req as any).query.record);
-    const id: string = (req as any).query.id;
+    const id: string = (req as any).query?.userId;
 
     const user = await User.findById(id);
     if (!user) {
@@ -69,7 +69,7 @@ router.post('/add', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const id: string = (req as any).query?.id;
+    const id: string = (req as any).query?.userId;
     const user: any = await User.findById(id);
     if (!user) {
       res.status(400).json({
@@ -85,6 +85,31 @@ router.get('/', async (req, res) => {
     });
 
     res.json({ sectors });
+  } catch (e) {
+    res.status(500).json({
+      message: e.message,
+    });
+  }
+});
+
+router.delete('/delete/sector', async (req, res) => {
+  try {
+    const id: string = (req as any).query?.userId;
+    const user: any = await User.findById(id);
+    if (!user) {
+      res.status(400).json({
+        type: ErrorType.USER_NOT_EXIST,
+        message: 'Incorrect user id',
+      });
+      return;
+    }
+
+    const removeIds: string[] = (req as any).query?.removeIds;
+    await Sector.deleteMany({
+      '_id' : removeIds,
+    });
+
+    res.send('Success delete');
   } catch (e) {
     res.status(500).json({
       message: e.message,
