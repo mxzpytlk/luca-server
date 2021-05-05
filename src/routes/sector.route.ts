@@ -16,7 +16,7 @@ router.post('/add', async (req, res) => {
     if (!user) {
       
       res.status(400).json({
-        type: ErrorType.FIELD_IS_EMPTY,
+        type: ErrorType.USER_NOT_EXIST,
         message: 'Incorrect user id',
       });
       return;
@@ -60,6 +60,31 @@ router.post('/add', async (req, res) => {
     await user.save();
     res.status(201).json({ id: resultSector.id });
 
+  } catch (e) {
+    res.status(500).json({
+      message: e.message,
+    });
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    const id: string = (req as any).query?.id;
+    const user: any = await User.findById(id);
+    if (!user) {
+      res.status(400).json({
+        type: ErrorType.USER_NOT_EXIST,
+        message: 'Incorrect user id',
+      });
+      return;
+    }
+
+    const sectorids: string[] = user.sectors;
+    const sectors = await Sector.find({
+      '_id' : sectorids,
+    });
+
+    res.json({ sectors });
   } catch (e) {
     res.status(500).json({
       message: e.message,
