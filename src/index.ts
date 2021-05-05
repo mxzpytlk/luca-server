@@ -3,6 +3,7 @@ import config from '../config.json';
 import mongoose from 'mongoose';
 
 import authRoute from './routes/auth.route';
+import recordRoute from './routes/sector.route';
 
 const PORT = config?.port || 3000;
 
@@ -28,6 +29,7 @@ function allowOrigin(req: any, res: any, next: any) {
 app.use(allowOrigin);
 
 app.use('/api/auth', authRoute);
+app.use('/api/record', recordRoute);
 
 async function start() {
   try {
