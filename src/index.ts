@@ -3,7 +3,8 @@ import config from '../config.json';
 import mongoose from 'mongoose';
 
 import authRoute from './routes/auth.route';
-import recordRoute from './routes/sector.route';
+import recordRoute from './routes/sector/sector.route';
+import recordDelete from './routes/sector/delete-record.route';
 
 const PORT = config?.port || 3000;
 
@@ -30,6 +31,7 @@ app.use(allowOrigin);
 
 app.use('/api/auth', authRoute);
 app.use('/api/record', recordRoute);
+app.use('/api/record', recordDelete)
 
 async function start() {
   try {

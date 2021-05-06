@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { ErrorType } from '../core/enums/error.enum';
-import { IRecord } from '../core/interfaces/record.interface';
-import Sector from '../models/sector';
-import User from '../models/user';
+import { ErrorType } from '../../core/enums/error.enum';
+import { IRecord } from '../../core/interfaces/record.interface';
+import Sector from '../../models/sector';
+import User from '../../models/user';
+import { findRecord, getSectors } from './actions';
 
 const router = Router();
 
@@ -90,7 +91,7 @@ router.post('/update', async (req, res) => {
       }
     }
 
-    const result = await findRecord(record, user);
+    const result = await findRecord(record.id, user);
     if (!result) {
       res.status(400).json({
         type: ErrorType.RECORD_NOT_EXIST,
@@ -138,53 +139,5 @@ router.get('/', async (req, res) => {
     });
   }
 });
-
-router.delete('/delete/sector', async (req, res) => {
-  try {
-    const id: string = (req as any).query?.userId;
-    const user = await User.findById(id);
-    if (!user) {
-      res.status(400).json({
-        type: ErrorType.USER_NOT_EXIST,
-        message: 'Incorrect user id',
-      });
-      return;
-    }
-
-    const removeIds: string[] = (req as any).query?.removeIds;
-    await Sector.deleteMany({
-      _id: removeIds,
-    });
-
-    const sectors = await getSectors(user);
-    (user as any).sectors = sectors;
-    await user.save();
-
-    res.send('Success delete');
-  } catch (e) {
-    res.status(500).json({
-      message: e.message,
-    });
-  }
-});
-
-async function findRecord(record: IRecord, user: any): Promise<any> {
-  const sectors = await getSectors(user);
-  for (const sector of sectors) {
-    const idx: number = sector.get('records').findIndex((item: IRecord) =>  item.id === record.id);
-    if (idx !== -1) {
-      const resRecord = sector.get('records')[idx];
-      return { record: resRecord, sector };
-    }
-  }
-  return null;
-}
-
-async function getSectors(user: any) {
-  const sectorids: string[] = user.sectors;
-  return await Sector.find({
-    _id: sectorids,
-  });
-}
 
 export default router;
