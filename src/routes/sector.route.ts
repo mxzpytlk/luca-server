@@ -14,7 +14,6 @@ router.post('/add', async (req, res) => {
 
     const user = await User.findById(id);
     if (!user) {
-      
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
         message: 'Incorrect user id',
@@ -59,7 +58,58 @@ router.post('/add', async (req, res) => {
     user.get('sectors').push(resultSector.id);
     await user.save();
     res.status(201).json({ id: resultSector.id });
+  } catch (e) {
+    res.status(500).json({
+      message: e.message,
+    });
+  }
+});
 
+router.post('/update', async (req, res) => {
+  try {
+    const record: IRecord = JSON.parse((req as any).query.record);
+    const id: string = (req as any).query?.userId;
+
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(400).json({
+        type: ErrorType.USER_NOT_EXIST,
+        message: 'Incorrect user id',
+      });
+      return;
+    }
+
+    const recordKeys = ['text', 'executionDate', 'executionPlanTime'];
+    for (const key of recordKeys) {
+      if (!(record as any)[key]) {
+        res.status(400).json({
+          type: ErrorType.FIELD_IS_EMPTY,
+          message: `${key} can not be empty`,
+        });
+        return;
+      }
+    }
+
+    const result = await findRecord(record, user);
+    if (!result) {
+      res.status(400).json({
+        type: ErrorType.RECORD_NOT_EXIST,
+        message: 'This record does not exist',
+      });
+      return;
+    }
+
+    const resultRecord: IRecord = result.record;
+    const sector = result.sector;
+
+    resultRecord.text = record.text;
+    resultRecord.executionDate = record.executionDate;
+    resultRecord.executionPlanTime = record.executionPlanTime;
+    resultRecord.executionTime = record.executionTime;
+    resultRecord.executionIntervals = record.executionIntervals;
+    await sector.save();
+
+    res.status(201).send('Update success');
   } catch (e) {
     res.status(500).json({
       message: e.message,
@@ -79,10 +129,7 @@ router.get('/', async (req, res) => {
       return;
     }
 
-    const sectorids: string[] = user.sectors;
-    const sectors = await Sector.find({
-      '_id' : sectorids,
-    });
+    const sectors = await getSectors(user);
 
     res.json({ sectors });
   } catch (e) {
@@ -95,7 +142,7 @@ router.get('/', async (req, res) => {
 router.delete('/delete/sector', async (req, res) => {
   try {
     const id: string = (req as any).query?.userId;
-    const user: any = await User.findById(id);
+    const user = await User.findById(id);
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
@@ -106,8 +153,12 @@ router.delete('/delete/sector', async (req, res) => {
 
     const removeIds: string[] = (req as any).query?.removeIds;
     await Sector.deleteMany({
-      '_id' : removeIds,
+      _id: removeIds,
     });
+
+    const sectors = await getSectors(user);
+    (user as any).sectors = sectors;
+    await user.save();
 
     res.send('Success delete');
   } catch (e) {
@@ -116,5 +167,24 @@ router.delete('/delete/sector', async (req, res) => {
     });
   }
 });
+
+async function findRecord(record: IRecord, user: any): Promise<any> {
+  const sectors = await getSectors(user);
+  for (const sector of sectors) {
+    const idx: number = sector.get('records').findIndex((item: IRecord) =>  item.id === record.id);
+    if (idx !== -1) {
+      const resRecord = sector.get('records')[idx];
+      return { record: resRecord, sector };
+    }
+  }
+  return null;
+}
+
+async function getSectors(user: any) {
+  const sectorids: string[] = user.sectors;
+  return await Sector.find({
+    _id: sectorids,
+  });
+}
 
 export default router;

@@ -5,4 +5,5 @@ export interface IRecord {
   executionPlanTime: number;
   executionTime?: number;
   executionIntervals: { start: Date, end: Date}[],
+  _id?: string;
 }
