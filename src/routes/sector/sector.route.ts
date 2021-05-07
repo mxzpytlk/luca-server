@@ -30,7 +30,7 @@ router.post('/add', async (req, res) => {
       return;
     }
 
-    const recordKeys = ['text', 'executionDate', 'executionPlanTime'];
+    const recordKeys = ['text', 'executionPlanTime'];
     for (const key of recordKeys) {
       if (!(record as any)[key]) {
         res.status(400).json({
@@ -40,11 +40,11 @@ router.post('/add', async (req, res) => {
         return;
       }
     }
-    const { text, executionDate, executionPlanTime } = record;
+    const { text, executionPlanTime } = record;
 
     const possibleSector = await Sector.findOne({ title });
     if (possibleSector) {
-      possibleSector.get('records').push({ text, executionDate, executionPlanTime });
+      possibleSector.get('records').push({ text, executionPlanTime });
       await possibleSector.save();
       res.status(201).send('Add record succes');
       return;
@@ -52,7 +52,7 @@ router.post('/add', async (req, res) => {
 
     const sector = new Sector({
       title,
-      records: [{ text, executionDate, executionPlanTime }],
+      records: [{ text, executionPlanTime }],
     });
 
     const resultSector = await sector.save();

@@ -31,7 +31,7 @@ app.use(allowOrigin);
 
 app.use('/api/auth', authRoute);
 app.use('/api/record', recordRoute);
-app.use('/api/record', recordDelete)
+app.use('/api/record', recordDelete);
 
 async function start() {
   try {

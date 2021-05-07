@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const schema = new Schema({
   title: { 
@@ -13,7 +13,7 @@ const schema = new Schema({
     },
     executionDate: {
       type: Date,
-      default: new Date(),
+      default: null,
     }, 
     executionPlanTime: {
       type: Number,
