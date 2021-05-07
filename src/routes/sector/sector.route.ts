@@ -3,7 +3,7 @@ import { ErrorType } from '../../core/enums/error.enum';
 import { IRecord } from '../../core/interfaces/record.interface';
 import Sector from '../../models/sector';
 import User from '../../models/user';
-import { findRecord, getSectors } from './actions';
+import { checkRecord, findRecord, getSectors, updateRecord } from './actions';
 
 const router = Router();
 
@@ -68,7 +68,7 @@ router.post('/add', async (req, res) => {
 
 router.post('/update', async (req, res) => {
   try {
-    const record: IRecord = JSON.parse((req as any).query.record);
+    const records: IRecord[] = (req as any).query.records.map(JSON.parse);
     const id: string = (req as any).query?.userId;
 
     const user = await User.findById(id);
@@ -80,35 +80,27 @@ router.post('/update', async (req, res) => {
       return;
     }
 
-    const recordKeys = ['text', 'executionDate', 'executionPlanTime'];
-    for (const key of recordKeys) {
-      if (!(record as any)[key]) {
-        res.status(400).json({
-          type: ErrorType.FIELD_IS_EMPTY,
-          message: `${key} can not be empty`,
-        });
-        return;
-      }
+    try {
+      records.forEach(checkRecord);
+    } catch(e) {
+      res.status(400).json({
+        type: ErrorType.FIELD_IS_EMPTY,
+        message: e.message,
+      });
     }
 
-    const result = await findRecord(record.id, user);
-    if (!result) {
+
+    try {
+      for (const record of records) {
+        await updateRecord(record, user);
+      }
+    } catch (e) {
       res.status(400).json({
         type: ErrorType.RECORD_NOT_EXIST,
-        message: 'This record does not exist',
+        message: e.message,
       });
       return;
     }
-
-    const resultRecord: IRecord = result.record;
-    const sector = result.sector;
-
-    resultRecord.text = record.text;
-    resultRecord.executionDate = record.executionDate;
-    resultRecord.executionPlanTime = record.executionPlanTime;
-    resultRecord.executionTime = record.executionTime;
-    resultRecord.executionIntervals = record.executionIntervals;
-    await sector.save();
 
     res.status(201).send('Update success');
   } catch (e) {
