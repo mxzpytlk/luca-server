@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ErrorType } from '../../core/enums/error.enum';
 import { IRecord } from '../../core/interfaces/record.interface';
+import { ISector } from '../../core/interfaces/sector.interface';
 import Sector from '../../models/sector';
 import User from '../../models/user';
 import { checkRecord, findRecord, getSectors, updateRecord } from './actions';
@@ -42,10 +43,14 @@ router.post('/add', async (req, res) => {
     }
     const { text, executionPlanTime } = record;
 
-    const possibleSector = await Sector.findOne({ title });
-    if (possibleSector) {
-      possibleSector.get('records').push({ text, executionPlanTime });
-      await possibleSector.save();
+    const posibleSectors = await Sector.find({ title });
+    const userSectors = new Set<string>(user.get('sectors').map(String));
+
+    const curSector = posibleSectors.find((item) => userSectors.has(item.id));
+
+    if (curSector) {
+      curSector.get('records').push({ text, executionPlanTime });
+      await curSector.save();
       res.status(201).send('Add record succes');
       return;
     }

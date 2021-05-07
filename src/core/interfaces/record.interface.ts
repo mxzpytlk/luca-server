@@ -4,6 +4,6 @@ export interface IRecord {
   executionDate: Date;
   executionPlanTime: number;
   executionTime?: number;
-  executionIntervals: { start: Date, end: Date}[],
+  executionIntervals?: Array<{ start: Date, end: Date}>;
   _id?: string;
 }
