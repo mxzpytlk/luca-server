@@ -36,7 +36,7 @@ router.post('/add', async (req, res) => {
       if (!(record as any)[key]) {
         res.status(400).json({
           type: ErrorType.FIELD_IS_EMPTY,
-          message: `${key} can not be empty`,
+          message: `${key}_empty`,
         });
         return;
       }
