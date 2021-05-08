@@ -51,7 +51,9 @@ router.post('/add', async (req, res) => {
     if (curSector) {
       curSector.get('records').push({ text, executionPlanTime });
       await curSector.save();
-      res.status(201).send('Add record succes');
+      const updatedSector = await Sector.findById(curSector.id);
+      const records: Partial<IRecord>[] = updatedSector.get('records');
+      res.status(201).json({ id: records[records.length - 1].id });
       return;
     }
 
