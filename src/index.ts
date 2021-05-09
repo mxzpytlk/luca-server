@@ -8,9 +8,9 @@ import recordDelete from './routes/sector/delete-record.route';
 
 const PORT = config?.port || 3000;
 
-const app = express();
+const app: express.Application = express();
 
-function allowOrigin(req: any, res: any, next: any) {
+function allowOrigin(req: express.Request, res: express.Response, next: any) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header(
     'Access-Control-Allow-Headers',
@@ -23,7 +23,7 @@ function allowOrigin(req: any, res: any, next: any) {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
     return res.status(200).json({});
   }
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
   next();
 }
 
@@ -33,7 +33,7 @@ app.use('/api/auth', authRoute);
 app.use('/api/record', recordRoute);
 app.use('/api/record', recordDelete);
 
-async function start() {
+async function start(): Promise<void> {
   try {
     await mongoose.connect(config.mongoUrl, {
       useNewUrlParser: true,

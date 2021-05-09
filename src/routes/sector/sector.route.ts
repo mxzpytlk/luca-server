@@ -1,20 +1,22 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { ErrorType } from '../../core/enums/error.enum';
 import { IRecord } from '../../core/interfaces/record.interface';
 import { ISector } from '../../core/interfaces/sector.interface';
+import { IUser } from '../../core/interfaces/user.interface';
+import { MDocument } from '../../core/types';
 import Sector from '../../models/sector';
 import User from '../../models/user';
-import { checkRecord, findRecord, getSectors, updateRecord } from './actions';
+import { checkRecord, getSectors, updateRecord } from './actions';
 
-const router = Router();
+const router: Router = Router();
 
-router.post('/add', async (req, res) => {
+router.post('/add', async (req: Request, res: Response) => {
   try {
-    const title = (req as any).query.title;
-    const record: IRecord = JSON.parse((req as any).query.record);
-    const id: string = (req as any).query?.userId;
+    const title = req.query.title as string;
+    const record: IRecord = JSON.parse(req.query.record as string);
+    const id = req.query.userId as string;
 
-    const user = await User.findById(id);
+    const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
@@ -31,19 +33,17 @@ router.post('/add', async (req, res) => {
       return;
     }
 
-    const recordKeys = ['text', 'executionPlanTime'];
-    for (const key of recordKeys) {
-      if (!(record as any)[key]) {
-        res.status(400).json({
-          type: ErrorType.FIELD_IS_EMPTY,
-          message: `${key}_empty`,
-        });
-        return;
-      }
+    try {
+      checkRecord(record);
+    } catch(e) {
+      res.status(400).json({
+        type: ErrorType.FIELD_IS_EMPTY,
+        message: e.message,
+      });
     }
     const { text, executionPlanTime } = record;
 
-    const posibleSectors = await Sector.find({ title });
+    const posibleSectors: MDocument<ISector>[] = await Sector.find({ title });
     const userSectors = new Set<string>(user.get('sectors').map(String));
 
     const curSector = posibleSectors.find((item) => userSectors.has(item.id));
@@ -51,19 +51,19 @@ router.post('/add', async (req, res) => {
     if (curSector) {
       curSector.get('records').push({ text, executionPlanTime });
       await curSector.save();
-      const updatedSector = await Sector.findById(curSector.id);
-      const records: Partial<IRecord>[] = updatedSector.get('records');
+      const updatedSector: MDocument<ISector> = await Sector.findById(curSector.id);
+      const records = updatedSector.records;
       res.status(201).json({ id: records[records.length - 1].id });
       return;
     }
 
-    const sector = new Sector({
+    const sector: MDocument<ISector> = new Sector({
       title,
       records: [{ text, executionPlanTime }],
     });
 
     const resultSector = await sector.save();
-    user.get('sectors').push(resultSector.id);
+    user.sectors.push(resultSector.id);
     await user.save();
     res.status(201).json({ id: resultSector.id });
   } catch (e) {
@@ -76,9 +76,9 @@ router.post('/add', async (req, res) => {
 router.post('/update', async (req, res) => {
   try {
     const records: IRecord[] = (req as any).query.records.map(JSON.parse);
-    const id: string = (req as any).query?.userId;
+    const id = req.query?.userId as string;
 
-    const user = await User.findById(id);
+    const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
@@ -119,8 +119,8 @@ router.post('/update', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const id: string = (req as any).query?.userId;
-    const user: any = await User.findById(id);
+    const id: string = req.query?.userId as string;
+    const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,

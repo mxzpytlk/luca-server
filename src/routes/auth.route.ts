@@ -1,16 +1,18 @@
-import { Router } from 'express';
-import { IAuth } from '../core/interfaces/auth.interface';
+import { Router, Request, Response } from 'express';
+import { IAuth, IChangePass } from '../core/interfaces/auth.interface';
 import { ErrorType } from '../core/enums/error.enum';
 import User from '../models/user';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../../config.json';
+import { IUser } from '../core/interfaces/user.interface';
+import { MDocument } from '../core/types';
 
-const router = Router();
+const router: Router = Router();
 
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { name, pass }: IAuth = (req.query as unknown as IAuth);
+    const { name, pass }: Partial<IAuth> = req.query;
 
     if (!name) {
       res.status(400).json({
@@ -28,7 +30,7 @@ router.post('/register', async (req, res) => {
       return;
     }
 
-    const candidate = await User.findOne({ name });
+    const candidate: MDocument<IUser> = await User.findOne({ name });
 
     if (candidate) {
       res.status(400).json({
@@ -55,7 +57,7 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { name, pass }: IAuth = (req.query as unknown as IAuth);
+    const { name, pass }: Partial<IAuth> = req.query;
 
     if (!name) {
       res.status(400).json({
@@ -73,7 +75,7 @@ router.post('/login', async (req, res) => {
       return;
     }
 
-    const user: any & IAuth = await User.findOne({ name });
+    const user: MDocument<IUser> = await User.findOne({ name });
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
@@ -109,8 +111,8 @@ router.post('/login', async (req, res) => {
 
 router.post('/change/pass', async (req, res) => {
   try {
-    const { oldPass, newPass, userId } = req.query;
-    const user = await User.findById(userId);
+    const { oldPass, newPass, userId }: Partial<IChangePass> = req.query;
+    const user: MDocument<IUser> = await User.findById(userId);
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
@@ -135,6 +137,7 @@ router.post('/change/pass', async (req, res) => {
       });
       return;
     }
+
     const hashPass = await bcrypt.hash(newPass as string, 15);
     (user as any).pass = hashPass;
     await user.save();

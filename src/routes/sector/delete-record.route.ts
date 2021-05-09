@@ -1,16 +1,19 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { ErrorType } from '../../core/enums/error.enum';
 import { IRecord } from '../../core/interfaces/record.interface';
+import { ISector } from '../../core/interfaces/sector.interface';
+import { IUser } from '../../core/interfaces/user.interface';
+import { MDocument } from '../../core/types';
 import Sector from '../../models/sector';
 import User from '../../models/user';
 import { findRecord, getSectors } from './actions';
 
 const router = Router();
 
-router.delete('/delete/sector', async (req, res) => {
+router.delete('/delete/sector', async (req: Request, res: Response) => {
   try {
-    const id: string = (req as any).query?.userId;
-    const user = await User.findById(id);
+    const id: string = req.query.userId as string;
+    const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
@@ -19,13 +22,13 @@ router.delete('/delete/sector', async (req, res) => {
       return;
     }
 
-    const removeIds: string[] = (req as any).query?.removeIds;
+    const removeIds = req.query?.removeIds as string[];
     await Sector.deleteMany({
       _id: removeIds,
     });
 
     const sectors = await getSectors(user);
-    (user as any).sectors = sectors;
+    user.sectors = (sectors as ISector[]);
     await user.save();
 
     res.send('Success delete');
@@ -38,8 +41,8 @@ router.delete('/delete/sector', async (req, res) => {
 
 router.delete('/delete/record', async (req, res) => {
   try {
-    const { userId, id } = (req as any).query;
-    const user = await User.findById(userId);
+    const { userId, id } = req.query;
+    const user: MDocument<IUser> = await User.findById(userId);
     if (!user) {
       res.status(400).json({
         type: ErrorType.USER_NOT_EXIST,
@@ -48,7 +51,7 @@ router.delete('/delete/record', async (req, res) => {
       return;
     }
 
-    const { sector, record } = await findRecord(id, user);
+    const { sector, record } = await findRecord(id as string, user);
     const idx = sector.records.findIndex((item: IRecord) => item.id === record.id);
     sector.records.splice(idx, 1);
     await sector.save();
