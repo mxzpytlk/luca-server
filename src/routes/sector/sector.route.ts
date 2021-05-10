@@ -73,7 +73,7 @@ router.post('/add', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/update', async (req, res) => {
+router.post('/update', async (req: Request, res: Response) => {
   try {
     const records: IRecord[] = (req as any).query.records.map(JSON.parse);
     const id = req.query?.userId as string;
@@ -117,7 +117,7 @@ router.post('/update', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const id: string = req.query?.userId as string;
     const user: MDocument<IUser> = await User.findById(id);

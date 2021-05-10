@@ -39,7 +39,7 @@ router.delete('/delete/sector', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/delete/record', async (req, res) => {
+router.delete('/delete/record', async (req: Request, res: Response) => {
   try {
     const { userId, id } = req.query;
     const user: MDocument<IUser> = await User.findById(userId);

@@ -55,7 +55,7 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response) => {
   try {
     const { name, pass }: Partial<IAuth> = req.query;
 
@@ -109,7 +109,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.post('/change/pass', async (req, res) => {
+router.post('/change/pass', async (req: Request, res: Response) => {
   try {
     const { oldPass, newPass, userId }: Partial<IChangePass> = req.query;
     const user: MDocument<IUser> = await User.findById(userId);
