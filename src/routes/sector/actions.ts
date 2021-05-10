@@ -44,7 +44,6 @@ export async function updateRecord(record: IRecord, user: MDocument<IUser>) {
   resultRecord.text = record.text;
   resultRecord.executionDate = record.executionDate;
   resultRecord.executionPlanTime = record.executionPlanTime;
-  resultRecord.executionTime = record.executionTime;
   resultRecord.executionIntervals = record.executionIntervals;
   await sector.save();
 }

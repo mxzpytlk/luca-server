@@ -18,10 +18,6 @@ const schema = new Schema({
       type: Number,
       required: true,
     },
-    executionTime: {
-      type: Number,
-      default: 0,
-    },
     executionIntervals: [{ 
       start: {
         type: Date,
