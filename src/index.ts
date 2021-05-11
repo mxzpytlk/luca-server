@@ -33,6 +33,10 @@ app.use('/api/auth', authRoute);
 app.use('/api/record', recordRoute);
 app.use('/api/record', recordDelete);
 
+app.get('/', (req: express.Request, res: express.Response) => {
+  res.send('<h1>Test</h1>');
+});
+
 async function start(): Promise<void> {
   try {
     await mongoose.connect(config.mongoUrl, {
