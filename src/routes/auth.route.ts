@@ -139,7 +139,7 @@ router.post('/change/pass', async (req: Request, res: Response) => {
     }
 
     const hashPass = await bcrypt.hash(newPass as string, 15);
-    (user as any).pass = hashPass;
+    user.pass = hashPass;
     await user.save();
 
     res.json({ message: 'Change password success' });

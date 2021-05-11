@@ -40,6 +40,7 @@ router.post('/add', async (req: Request, res: Response) => {
         type: ErrorType.FIELD_IS_EMPTY,
         message: e.message,
       });
+      return;
     }
     const { text, executionPlanTime } = record;
 
@@ -53,7 +54,7 @@ router.post('/add', async (req: Request, res: Response) => {
       await curSector.save();
       const updatedSector: MDocument<ISector> = await Sector.findById(curSector.id);
       const records = updatedSector.records;
-      res.status(201).json({ id: records[records.length - 1].id });
+      res.status(201).json({ recordId: records[records.length - 1].id });
       return;
     }
 
@@ -65,7 +66,7 @@ router.post('/add', async (req: Request, res: Response) => {
     const resultSector = await sector.save();
     user.sectors.push(resultSector.id);
     await user.save();
-    res.status(201).json({ id: resultSector.id });
+    res.status(201).json({ sectorId: resultSector.id, recordId: resultSector.records[0].id });
   } catch (e) {
     res.status(500).json({
       message: e.message,
