@@ -6,7 +6,7 @@ import authRoute from './routes/auth.route';
 import recordRoute from './routes/sector/sector.route';
 import recordDelete from './routes/sector/delete-record.route';
 
-const PORT = config?.port || 3000;
+const PORT = process.env.PORT || config?.port || 3000;
 
 const app: express.Application = express();
 
