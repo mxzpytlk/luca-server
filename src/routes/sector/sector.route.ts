@@ -4,17 +4,18 @@ import { IRecord } from '../../core/interfaces/record.interface';
 import { ISector } from '../../core/interfaces/sector.interface';
 import { IUser } from '../../core/interfaces/user.interface';
 import { MDocument } from '../../core/types';
+import { allowAuth } from '../../middleware/auth.middleware';
 import Sector from '../../models/sector';
 import User from '../../models/user';
 import { checkRecord, getSectors, updateRecord } from './actions';
 
 const router: Router = Router();
 
-router.post('/add', async (req: Request, res: Response) => {
+router.post('/add', allowAuth, async (req: Request, res: Response) => {
   try {
     const title = req.query.title as string;
     const record: IRecord = JSON.parse(req.query.record as string);
-    const id = req.query.userId as string;
+    const id: string = (req as any).userId;
 
     const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
@@ -74,10 +75,10 @@ router.post('/add', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/update', async (req: Request, res: Response) => {
+router.post('/update', allowAuth, async (req: Request, res: Response) => {
   try {
     const records: IRecord[] = (req as any).query.records.map(JSON.parse);
-    const id = req.query?.userId as string;
+    const id: string = (req as any).userId;
 
     const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
@@ -118,12 +119,12 @@ router.post('/update', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', allowAuth, async (req: Request, res: Response) => {
   try {
-    const id: string = req.query?.userId as string;
+    const id: string = (req as any).userId;
     const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
-      res.status(400).json({
+      res.status(401).json({
         type: ErrorType.USER_NOT_EXIST,
         message: 'Incorrect user id',
       });

@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import config from '../../config.json';
 import { IUser } from '../core/interfaces/user.interface';
 import { MDocument } from '../core/types';
+import { allowAuth } from '../middleware/auth.middleware';
 
 const router: Router = Router();
 
@@ -109,7 +110,7 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/change/pass', async (req: Request, res: Response) => {
+router.post('/change/pass', allowAuth, async (req: Request, res: Response) => {
   try {
     const { oldPass, newPass, userId }: Partial<IChangePass> = req.query;
     const user: MDocument<IUser> = await User.findById(userId);

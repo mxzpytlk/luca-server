@@ -7,12 +7,13 @@ import { MDocument } from '../../core/types';
 import Sector from '../../models/sector';
 import User from '../../models/user';
 import { findRecord, getSectors } from './actions';
+import { allowAuth } from '../../middleware/auth.middleware';
 
 const router = Router();
 
-router.delete('/delete/sector', async (req: Request, res: Response) => {
+router.delete('/delete/sector', allowAuth, async (req: Request, res: Response) => {
   try {
-    const id: string = req.query.userId as string;
+    const id: string = (req as any).userId;
     const user: MDocument<IUser> = await User.findById(id);
     if (!user) {
       res.status(400).json({
@@ -39,9 +40,11 @@ router.delete('/delete/sector', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/delete/record', async (req: Request, res: Response) => {
+router.delete('/delete/record', allowAuth, async (req: Request, res: Response) => {
   try {
-    const { userId, id } = req.query;
+    const userId: string = (req as any).userId;
+
+    const id  = req.query?.id;
     const user: MDocument<IUser> = await User.findById(userId);
     if (!user) {
       res.status(400).json({
