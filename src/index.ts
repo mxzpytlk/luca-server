@@ -5,22 +5,19 @@ import mongoose from 'mongoose';
 import authRoute from './routes/auth.route';
 import recordRoute from './routes/sector/sector.route';
 import recordDelete from './routes/sector/delete-record.route';
-import { allowOrigin } from './middleware/allow-origin.middlewate';
 
 const PORT = process.env.PORT || config?.port || 3000;
 
 const app: express.Application = express();
 
-app.use(express.static('public'));
-
-app.use('/luca', express.static('public'));
-
-app.use(allowOrigin);
 
 app.use('/api/auth', authRoute);
 app.use('/api/record', recordRoute);
 app.use('/api/record', recordDelete);
 
+app.use(express.static('public'));
+
+app.use('/luca/', express.static('public'));
 
 async function start(): Promise<void> {
   try {
