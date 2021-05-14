@@ -1,5 +1,0 @@
-{
-  "port": 3000,
-  "mongoUrl": "mongodb+srv://mxzpytlk:m.JmF2@cmKH!9P4@cluster0.kccov.mongodb.net/app?retryWrites=true&w=majority",
-  "jwtSecret": "sDdj2fv4aswDSwe"
-}
