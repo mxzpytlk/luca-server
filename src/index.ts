@@ -11,15 +11,16 @@ const PORT = process.env.PORT || config?.port || 3000;
 
 const app: express.Application = express();
 
+app.use(express.static('public'));
+
+app.use('/luca', express.static('public'));
+
 app.use(allowOrigin);
 
 app.use('/api/auth', authRoute);
 app.use('/api/record', recordRoute);
 app.use('/api/record', recordDelete);
 
-app.get('/', (req: express.Request, res: express.Response) => {
-  res.send('<h1>Test</h1>');
-});
 
 async function start(): Promise<void> {
   try {
